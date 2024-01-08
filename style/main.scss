@@ -1,3 +1,5 @@
+@use "util.scss";
+
 body {
 	font-family: monospace;
 	background-color: dimgray;
@@ -6,19 +8,18 @@ body {
 main {
 	min-height: 98vh;
 	min-width: 98vw;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	@include util.center-flex;
 }
 
 #term {
-	min-width: 60%;
-	min-height: 50%;
+	max-width: 1200px;
+	width: 70%;
+	height: 75%;
 	position: absolute;
 	background-color: black;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	border-radius: 15;
+	box-shadow: 10px 5px 50px black;
+	@include util.center-flex;
 
 	p {
 		color: white;
