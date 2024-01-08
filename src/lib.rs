@@ -1,4 +1,6 @@
 pub mod app;
+pub mod term;
+
 use cfg_if::cfg_if;
 
 cfg_if! {

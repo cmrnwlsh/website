@@ -1,7 +1,27 @@
-@use 'test';
-
 body {
-	font-family: sans-serif;
-	text-align: center;
+	font-family: monospace;
 	background-color: dimgray;
+}
+
+main {
+	min-height: 98vh;
+	min-width: 98vw;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#term {
+	min-width: 60%;
+	min-height: 50%;
+	position: absolute;
+	background-color: black;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	p {
+		color: white;
+		text-align: center;
+	}
 }
