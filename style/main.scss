@@ -1,28 +1,77 @@
-@use "util.scss";
+$primary: #2C474B;
+$secondary: #8BA08C;
+$tertiary: #171E28;
+$breakpoint-small: 850;
+$breakpoint-medium: 1100;
+
+@mixin center-flex {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 
 body {
 	font-family: monospace;
-	background-color: dimgray;
+	background-color: $primary;
+	font-size: 12;
 }
 
 main {
+	@include center-flex;
 	min-height: 98vh;
 	min-width: 98vw;
-	@include util.center-flex;
 }
 
 #term {
-	max-width: 1200px;
+	@include center-flex;
+	max-width: 900px;
 	width: 70%;
-	height: 75%;
+	height: 80%;
+
+	@media (max-width: $breakpoint-medium) {
+		width: 90%;
+		height: 90%;
+	}
+
 	position: absolute;
-	background-color: black;
+	background-color: $tertiary;
 	border-radius: 15;
 	box-shadow: 10px 5px 50px black;
-	@include util.center-flex;
+	flex-flow: column;
 
 	p {
-		color: white;
+		color: $secondary;
 		text-align: center;
+	}
+
+	form {
+		@mixin inner-form {
+			font-family: monospace;
+			font-size: 16;
+			color: $secondary;
+
+			@media (max-width: $breakpoint-medium) {
+				font-size: 12;
+			}
+
+			@media (max-width: $breakpoint-small) {
+				font-size: 10;
+			}
+		}
+
+		position: absolute;
+		bottom: 20;
+		left: 5;
+
+		label {
+			@include inner-form
+		}
+
+		input {
+			@include inner-form;
+			background: transparent;
+			border: none;
+			outline: none;
+		}
 	}
 }
