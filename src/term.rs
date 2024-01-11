@@ -1,29 +1,70 @@
+use leptos::ev::KeyboardEvent;
+use leptos::html::Input;
 use leptos::*;
+use uuid::Uuid;
 
-fn window_size() -> i32 {
-    window().inner_width().unwrap().as_f64().unwrap() as i32
+#[derive(Clone)]
+struct Row(Uuid, String);
+
+impl<T> From<T> for Row
+    where
+        String: From<T>,
+{
+    fn from(value: T) -> Self {
+        Self(Uuid::new_v4(), value.into())
+    }
 }
 
 #[component]
 pub fn Term() -> impl IntoView {
     let (form, set_form) = create_signal(String::new());
-    create_effect(move |_| set_form.set("a".repeat(if window_size() < 700 { 50 } else { 80 })));
+    let (term_output, term_output_write) =
+        create_signal(vec![Row::from("testline")]);
+    let input: NodeRef<Input> = create_node_ref();
+    let keydown = move |ev: KeyboardEvent| {
+        ev.prevent_default();
+        term_output_write.update(move |lines| match &*ev.key() {
+            "Backspace" => {
+                set_form.update(|s| {
+                    let mut t = s.chars();
+                    t.next_back();
+                    *s = t.as_str().into()
+                });
+            }
+            "Enter" => {
+                lines.push(input().unwrap().value().into());
+                set_form.set(String::new());
+            }
+            _ => set_form.update(move |s| s.push(ev.key().chars().next().unwrap())),
+        });
+    };
+    let size = || match window().inner_width().unwrap().as_f64().unwrap() as i32 {
+        0..=700 => 50,
+        _ => 80,
+    };
+    create_effect(move |_| set_form.set("hello world".into()));
     view! {
         <div id="term">
-            <p>"hello world"</p>
+            <ul>
+                <For
+                    each=term_output
+                    key=|line| line.0
+                    children=move |line| {
+                        view! { <code>{line.1}</code> }
+                    }
+                />
+            </ul>
             <form>
                 <label>"cmd ~> "</label>
                 <input
                     type="text"
-                    on:input=move |ev| {
-                        set_form(event_target_value(&ev));
-                    }
-
+                    node_ref=input
+                    on:keydown=keydown
                     prop:value=form
-                    prop:size=move || { if window_size() < 700 { 50 } else { 80 } }
+                    prop:size=size
                 />
-            </form>
 
+            </form>
         </div>
     }
 }
