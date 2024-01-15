@@ -5,81 +5,82 @@ $breakpoint-small: 850;
 $breakpoint-medium: 1100;
 
 @mixin center-flex {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 body {
-	font-family: monospace;
-	background-color: $primary;
-	font-size: 12px;
+  font-family: monospace;
+  background-color: $primary;
+  font-size: 12px;
 }
 
 main {
-	@include center-flex;
-	min-height: 98vh;
-	min-width: 98vw;
+  @include center-flex;
+  min-height: 98vh;
+  min-width: 98vw;
 }
 
 #term {
-	max-width: 900px;
-	width: 70%;
-	height: 80%;
+  max-width: 900px;
+  width: 70%;
+  height: 80%;
 
-	@media (max-width: $breakpoint-medium) {
-		width: 90%;
-		height: 90%;
-	}
+  @media (max-width: $breakpoint-medium) {
+    width: 90%;
+    height: 90%;
+  }
 
-	position: absolute;
-	background-color: $tertiary;
-	border-radius: 15px;
-	box-shadow: 10px 5px 50px black;
-	flex-flow: column;
+  position: absolute;
+  background-color: $tertiary;
+  border-radius: 15px;
+  box-shadow: 10px 5px 50px black;
+  flex-flow: column;
 
-	ul {
-		height: 95%;
-		@media (max-height: 800px) and (min-width: 800px) {
-			height: 85%;
-		}
-		@media (max-width: $breakpoint-small) {
-			font-size: 10px;
-		}
-		display: flex;
-		flex-direction: column-reverse;
-		margin-left: -30px;
-		overflow-x: hidden;
-		overflow-y: auto;
-		code {
-			color: $secondary;
-		}
-	}
+  ul {
+    height: 95%;
+    @media (max-height: 800px) and (min-width: 800px) {
+      height: 85%;
+    }
+    @media (max-width: $breakpoint-small) {
+      font-size: 10px;
+    }
+    display: flex;
+    flex-direction: column-reverse;
+    margin-left: -30px;
+    overflow-x: hidden;
+    overflow-y: auto;
 
-	form {
-		@mixin inner-form {
-			font-family: monospace;
-			color: $secondary;
+    code {
+      color: $secondary;
+    }
+  }
 
-			@media (max-width: $breakpoint-small) {
-				font-size: 10px;
-			}
-		}
-		padding-left: 10px;
-		margin-top: -10px;
-		white-space: nowrap;
+  form {
+    @mixin inner-form {
+      font-family: monospace;
+      color: $secondary;
 
-		label {
-			@include inner-form;
-			display: inline-block
-		}
+      @media (max-width: $breakpoint-small) {
+        font-size: 10px;
+      }
+    }
+    padding-left: 10px;
+    margin-top: -10px;
+    white-space: nowrap;
 
-		input {
-			@include inner-form;
-			display: inline-block;
-			background: transparent;
-			border: none;
-			outline: none;
-		}
-	}
+    label {
+      @include inner-form;
+      display: inline-block
+    }
+
+    input {
+      @include inner-form;
+      display: inline-block;
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+  }
 }
