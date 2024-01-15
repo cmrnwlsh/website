@@ -39,9 +39,18 @@ main {
 	flex-flow: column;
 
 	ul {
+		height: 95%;
+		@media (max-height: 800px) and (min-width: 800px) {
+			height: 85%;
+		}
+		@media (max-width: $breakpoint-small) {
+			font-size: 10px;
+		}
 		display: flex;
-		flex-direction: column;
+		flex-direction: column-reverse;
 		margin-left: -30px;
+		overflow-x: hidden;
+		overflow-y: auto;
 		code {
 			color: $secondary;
 		}
@@ -50,28 +59,24 @@ main {
 	form {
 		@mixin inner-form {
 			font-family: monospace;
-			font-size: 16px;
 			color: $secondary;
-
-			@media (max-width: $breakpoint-medium) {
-				font-size: 12px;
-			}
 
 			@media (max-width: $breakpoint-small) {
 				font-size: 10px;
 			}
 		}
-
-		position: absolute;
-		bottom: 20px;
-		left: 10px;
+		padding-left: 10px;
+		margin-top: -10px;
+		white-space: nowrap;
 
 		label {
-			@include inner-form
+			@include inner-form;
+			display: inline-block
 		}
 
 		input {
 			@include inner-form;
+			display: inline-block;
 			background: transparent;
 			border: none;
 			outline: none;
