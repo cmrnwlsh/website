@@ -6,12 +6,39 @@ use uuid::Uuid;
 #[derive(Clone)]
 struct Row(Uuid, String);
 
-impl<T> From<T> for Row
-    where
-        String: From<T>,
+impl<T> From<T> for Row where String: From<T>
 {
     fn from(value: T) -> Self {
         Self(Uuid::new_v4(), value.into())
+    }
+}
+
+#[derive(Clone)]
+enum Command {
+    Echo(Vec<Row>),
+    None,
+}
+
+impl From<String> for Command {
+    fn from(value: String) -> Self {
+        let data: Vec<String> = value
+            .split_whitespace().map(|s| s.into()).collect();
+        match data.first() {
+            Some(s) if s.as_str() == "echo" => Self::Echo(vec![
+                Row::from("Echo:"),
+                Row::from(format!("   {}", value.get(5..).unwrap_or("no input")))
+            ]),
+            _ => Self::None
+        }
+    }
+}
+
+impl Command {
+    fn evaluate(self) -> Option<Vec<Row>> {
+        match self {
+            Self::Echo(data) => Some(data),
+            _ => None
+        }
     }
 }
 
@@ -24,6 +51,7 @@ pub fn Term() -> impl IntoView {
             _ => 80,
         }
     }
+    let navigate = leptos_router::use_navigate();
     let ((input_r, input_w), input_ref) =
         (create_signal(String::new()), create_node_ref::<Input>());
     let term_output = create_rw_signal(vec![Row::from("hello world")]);
@@ -31,7 +59,10 @@ pub fn Term() -> impl IntoView {
     let handle = window_event_listener(ev::resize, move |_| term_size.set(input_size()));
     let on_submit = move |ev: SubmitEvent| {
         ev.prevent_default();
-        term_output.update(|lines| lines.push(input_r.get().into()));
+        let cmd = Command::from(input_r.get());
+        if let Some(mut output) = cmd.evaluate() {
+            term_output.update(|term| term.append(&mut output));
+        };
         input_w.set("".into());
         input_ref.get().unwrap().set_value("");
     };

@@ -10,6 +10,17 @@ $breakpoint-medium: 1100;
   align-items: center;
 }
 
+@mixin dimensions {
+  max-width: 900px;
+  width: 70%;
+  height: 80%;
+
+  @media (max-width: $breakpoint-medium) {
+    width: 90%;
+    height: 90%;
+  }
+}
+
 body {
   font-family: monospace;
   background-color: $primary;
@@ -23,15 +34,7 @@ main {
 }
 
 #term {
-  max-width: 900px;
-  width: 70%;
-  height: 80%;
-
-  @media (max-width: $breakpoint-medium) {
-    width: 90%;
-    height: 90%;
-  }
-
+  @include dimensions;
   position: absolute;
   background-color: $tertiary;
   border-radius: 15px;
@@ -51,6 +54,7 @@ main {
     margin-left: -30px;
     overflow-x: hidden;
     overflow-y: auto;
+    white-space: pre;
 
     code {
       color: $secondary;
