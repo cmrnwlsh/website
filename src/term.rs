@@ -13,6 +13,9 @@ impl<T> From<T> for Row where String: From<T>
     }
 }
 
+// echo/reading has rows as output data,
+// directory traversal should have location as output data
+// application should have navigation target as output data
 #[derive(Clone)]
 enum Command {
     Echo(Vec<Row>),
