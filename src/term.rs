@@ -19,6 +19,7 @@ impl<T> From<T> for Row where String: From<T>
 #[derive(Clone)]
 enum Command {
     Echo(Vec<Row>),
+    NotFound(Vec<Row>),
     None,
 }
 
@@ -28,8 +29,12 @@ impl From<String> for Command {
             .split_whitespace().map(|s| s.into()).collect();
         match data.first() {
             Some(s) if s.as_str() == "echo" => Self::Echo(vec![
-                Row::from("Echo:"),
-                Row::from(format!("   {}", value.get(5..).unwrap_or("no input")))
+                "Echo:".into(),
+                format!("  {}", value.get(5..).unwrap_or("no input")).into()
+            ]),
+            Some(_) => Self::NotFound(vec![
+                "Command not found:".into(),
+                format!("  {value}").into()
             ]),
             _ => Self::None
         }
@@ -39,7 +44,9 @@ impl From<String> for Command {
 impl Command {
     fn evaluate(self) -> Option<Vec<Row>> {
         match self {
-            Self::Echo(data) => Some(data),
+            Self::Echo(data) | Self::NotFound(data) => {
+                Some(data)
+            }
             _ => None
         }
     }
