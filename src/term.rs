@@ -43,6 +43,7 @@ enum Command {
     Echo(Rows),
     Help(Rows),
     NotFound(Rows),
+    Cat(Option<String>),
     Ls,
     None,
 }
@@ -55,15 +56,26 @@ impl Command {
             Self::NotFound(data) => {
                 Evaluated::TermOutput(data)
             }
-            Self::Ls => Evaluated::Ls,
+            Self::Cat(data) => Evaluated::ReadFile(data),
+            Self::Ls => Evaluated::ListDir,
             Self::None => Evaluated::None
         }
     }
 }
 
+enum Evaluated {
+    TermOutput(Rows),
+    ChangedDirectory(String),
+    Navigation(String),
+    ReadFile(Option<String>),
+    ListDir,
+    None,
+}
+
 static HELP_TEXT: phf::Map<&'static str, &'static str> = phf_map! {
     "echo" => "prints input string to the terminal",
     "ls" => "list current directory contents",
+    "cat" => "read the contents of a file",
     "help" => "get some help"
 };
 
@@ -86,6 +98,7 @@ impl From<String> for Command {
                 ret
             }),
             Some(s) if s.as_str() == "ls" => Self::Ls,
+            Some(s) if s.as_str() == "cat" => Self::Cat(data.get(1).cloned()),
             Some(_) => Self::NotFound(vec![
                 "command not found:".to_string(),
                 format!("  {value}"),
@@ -93,14 +106,6 @@ impl From<String> for Command {
             _ => Self::None
         }
     }
-}
-
-enum Evaluated {
-    TermOutput(Rows),
-    ChangedDirectory(String),
-    Navigation(String),
-    Ls,
-    None,
 }
 
 #[derive(Clone)]
@@ -123,7 +128,7 @@ impl FileDir {
         }
     }
 
-    fn contents(&self) -> Vec<String> {
+    fn content(&self) -> Vec<String> {
         match self {
             Self::File { content: File::Text(lines), .. } => lines.clone(),
             Self::File { content: File::Link(link), .. } => vec![link.clone()],
@@ -175,12 +180,18 @@ pub fn Term() -> impl IntoView {
             Evaluated::TermOutput(mut output) => {
                 term_output.update(|term| term.append(&mut output))
             }
-            Evaluated::Ls => {
+            Evaluated::ListDir => {
                 term_output.update(|term| {
                     term.push("ls:".into());
-                    term.append(&mut current_dir.get().contents().into_iter()
+                    term.append(&mut current_dir.get().content().into_iter()
                         .map(|s| ("  ".to_string() + s.as_str()).into()).collect())
                 })
+            }
+            Evaluated::ReadFile(Some(name)) => {
+
+            }
+            Evaluated::ReadFile(None) => {
+                term_output.update(|term| term.append(&mut Rows::from(vec!["cat:", "  no input"])))
             }
             _ => {}
         };
