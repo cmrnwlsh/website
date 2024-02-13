@@ -1,8 +1,9 @@
-use std::ops::{Deref, DerefMut};
+use either::*;
 use leptos::ev::SubmitEvent;
 use leptos::html::Input;
 use leptos::*;
 use phf::phf_map;
+use std::ops::{Deref, DerefMut};
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -11,14 +12,19 @@ struct Row(Uuid, String);
 #[derive(Clone)]
 struct Rows(Vec<Row>);
 
-impl<T> From<T> for Row where String: From<T>
+impl<T> From<T> for Row
+where
+    String: From<T>,
 {
     fn from(value: T) -> Self {
         Self(Uuid::new_v4(), value.into())
     }
 }
 
-impl<T> From<Vec<T>> for Rows where String: From<T>, {
+impl<T> From<Vec<T>> for Rows
+where
+    String: From<T>,
+{
     fn from(value: Vec<T>) -> Self {
         Self(value.into_iter().map(Row::from).collect())
     }
@@ -51,14 +57,12 @@ enum Command {
 impl Command {
     fn evaluate(self) -> Evaluated {
         match self {
-            Self::Echo(data) |
-            Self::Help(data) |
-            Self::NotFound(data) => {
+            Self::Echo(data) | Self::Help(data) | Self::NotFound(data) => {
                 Evaluated::TermOutput(data)
             }
             Self::Cat(data) => Evaluated::ReadFile(data),
             Self::Ls => Evaluated::ListDir,
-            Self::None => Evaluated::None
+            Self::None => Evaluated::None,
         }
     }
 }
@@ -83,27 +87,47 @@ impl From<String> for Command {
     fn from(value: String) -> Self {
         let data: Vec<String> = value.split_whitespace().map(|s| s.into()).collect();
         match data.first() {
-            Some(s) if s.as_str() == "echo" => Self::Echo(vec![
-                "echo:".to_string(),
-                format!("  {}", if data.len() > 1 { &value[5..] } else { &"no input" }),
-            ].into()),
+            Some(s) if s.as_str() == "echo" => Self::Echo(
+                vec![
+                    "echo:".to_string(),
+                    format!(
+                        "  {}",
+                        if data.len() > 1 {
+                            &value[5..]
+                        } else {
+                            &"no input"
+                        }
+                    ),
+                ]
+                .into(),
+            ),
             Some(s) if s.as_str() == "help" => Self::Help(if data.len() > 1 {
                 vec![
                     format!("help: {}", data[1].as_str()),
-                    format!("  {}", *HELP_TEXT.get(data[1].as_str()).unwrap_or(&"command not found")),
-                ].into()
+                    format!(
+                        "  {}",
+                        *HELP_TEXT
+                            .get(data[1].as_str())
+                            .unwrap_or(&"command not found")
+                    ),
+                ]
+                .into()
             } else {
                 let mut ret: Rows = vec!["help:"].into();
-                ret.append(&mut HELP_TEXT.entries().map(|(k, v)| format!("  {k}: {v}").into()).collect());
+                ret.append(
+                    &mut HELP_TEXT
+                        .entries()
+                        .map(|(k, v)| format!("  {k}: {v}").into())
+                        .collect(),
+                );
                 ret
             }),
             Some(s) if s.as_str() == "ls" => Self::Ls,
             Some(s) if s.as_str() == "cat" => Self::Cat(data.get(1).cloned()),
-            Some(_) => Self::NotFound(vec![
-                "command not found:".to_string(),
-                format!("  {value}"),
-            ].into()),
-            _ => Self::None
+            Some(_) => {
+                Self::NotFound(vec!["command not found:".to_string(), format!("  {value}")].into())
+            }
+            _ => Self::None,
         }
     }
 }
@@ -123,18 +147,21 @@ enum FileDir {
 impl FileDir {
     fn name(&self) -> &String {
         match self {
-            Self::File { name, .. } |
-            Self::Directory { name, .. } => name
+            Self::File { name, .. } | Self::Directory { name, .. } => name,
         }
     }
 
-    fn content(&self) -> Vec<String> {
+    fn content(&self) -> Either<Vec<String>, Vec<FileDir>> {
         match self {
-            Self::File { content: File::Text(lines), .. } => lines.clone(),
-            Self::File { content: File::Link(link), .. } => vec![link.clone()],
-            Self::Directory { content, .. } => {
-                content.iter().map(|fd| fd.name().clone()).collect()
-            }
+            Self::File {
+                content: File::Text(lines),
+                ..
+            } => Left(lines.clone()),
+            Self::File {
+                content: File::Link(link),
+                ..
+            } => Left(vec![link.clone()]),
+            Self::Directory { content, .. } => Right(content.clone()),
         }
     }
 }
@@ -142,16 +169,15 @@ impl FileDir {
 fn filesystem_init() -> FileDir {
     FileDir::Directory {
         name: "home".into(),
-        content: vec![
-            FileDir::File {
-                name: "test_file".into(),
-                content: File::Text(vec![
-                    "this is",
-                    "a multi line",
-                    "test file",
-                ].into_iter().map(String::from).collect()),
-            }
-        ],
+        content: vec![FileDir::File {
+            name: "test_file".into(),
+            content: File::Text(
+                vec!["this is", "a multi line", "test file"]
+                    .into_iter()
+                    .map(String::from)
+                    .collect(),
+            ),
+        }],
     }
 }
 
@@ -180,16 +206,47 @@ pub fn Term() -> impl IntoView {
             Evaluated::TermOutput(mut output) => {
                 term_output.update(|term| term.append(&mut output))
             }
-            Evaluated::ListDir => {
-                term_output.update(|term| {
-                    term.push("ls:".into());
-                    term.append(&mut current_dir.get().content().into_iter()
-                        .map(|s| ("  ".to_string() + s.as_str()).into()).collect())
-                })
-            }
-            Evaluated::ReadFile(Some(name)) => {
-
-            }
+            Evaluated::ListDir => term_output.update(|term| {
+                term.push("ls:".into());
+                term.append(&mut Rows::from(
+                    current_dir
+                        .get()
+                        .content()
+                        .right()
+                        .unwrap()
+                        .into_iter()
+                        .map(|f| format!("  {}", f.name().clone()))
+                        .collect::<Vec<_>>(),
+                ))
+            }),
+            Evaluated::ReadFile(Some(name)) => term_output.update(|term| {
+                term.append(&mut Rows::from(
+                    if let Some(file) = current_dir
+                        .get()
+                        .content()
+                        .right()
+                        .unwrap()
+                        .into_iter()
+                        .find(|f| f.name() == &name)
+                    {
+                        vec!["cat:".into()]
+                            .into_iter()
+                            .chain(
+                                file.content()
+                                    .left()
+                                    .unwrap()
+                                    .into_iter()
+                                    .map(|s| format!("  {s}"))
+                                    .collect::<Vec<_>>(),
+                            )
+                            .collect::<Vec<_>>()
+                    } else {
+                        vec!["file not found:".into(), format!("  {name}")]
+                            .into_iter()
+                            .collect()
+                    },
+                ))
+            }),
             Evaluated::ReadFile(None) => {
                 term_output.update(|term| term.append(&mut Rows::from(vec!["cat:", "  no input"])))
             }

@@ -1,6 +1,6 @@
 pub mod app;
-pub mod term;
 pub mod asteroids;
+pub mod term;
 
 use cfg_if::cfg_if;
 
