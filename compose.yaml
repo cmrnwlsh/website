@@ -5,7 +5,7 @@ services:
     image: nginx:latest
     ports:
       - 80:80
-      - 443:443
+    network_mode: "host"
     restart: unless-stopped
     volumes:
       - /home/server/.local/nginx/conf.d/:/etc/nginx/conf.d/:ro
@@ -14,4 +14,9 @@ services:
     image: certbot/certbot:latest
     volumes:
       - /home/server/.local/www/certbot/:/var/www/certbot/:rw
-      - /etc/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:rw 
+      - /etc/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:rw
+  website:
+    build: .
+    ports:
+      443:3000
+    network_mode: "host"
