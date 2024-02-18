@@ -1,18 +1,23 @@
 use actix_files::NamedFile;
+use actix_files::Files;
+use actix_web::*;
+use leptos::*;
+use leptos_actix::{generate_route_list, LeptosRoutes};
+use website::app::*;
+use openssl::ssl::{SslAcceptor, SslMethod, SslFiletype};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    use actix_files::Files;
-    use actix_web::*;
-    use leptos::*;
-    use leptos_actix::{generate_route_list, LeptosRoutes};
-    use website::app::*;
-
     let conf = get_configuration(None).await.unwrap();
     let addr = conf.leptos_options.site_addr;
     let routes = generate_route_list(App);
-    println!("listening on http://{}", &addr);
-
+    let mut ssl_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+        ssl_builder
+        .set_private_key_file("./cert/key.pem", SslFiletype::PEM)
+        .unwrap();
+    ssl_builder.set_certificate_chain_file("./cert/cert.pem").unwrap();
+    println!("listening on https://{}", &addr);
+    
     HttpServer::new(move || {
         let leptos_options = &conf.leptos_options;
 
@@ -28,7 +33,9 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(leptos_options.to_owned()))
             .wrap(middleware::Compress::default())
     })
-    .bind(&addr)?
+    .bind_openssl(&addr, ssl_builder)?
     .run()
     .await
 }
+
+
