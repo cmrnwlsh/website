@@ -13,5 +13,5 @@ services:
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - $HOME/.local/www/certbot/:/var/www/certbot/:rw
-      - $HOME/.local/letsencrypt/:/etc/letsencrypt/:rw
+      - /home/server/.local/www/certbot/:/var/www/certbot/:rw
+      - /home/server/.local/letsencrypt/:/etc/letsencrypt/:rw
