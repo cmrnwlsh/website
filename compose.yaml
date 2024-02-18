@@ -8,10 +8,10 @@ services:
       - 443:443
     restart: unless-stopped
     volumes:
-      - $HOME/.local/nginx/conf.d/:./nginx/conf/:ro
-      - $HOME/.local/www/certbot/:./certbot/www/:ro
+      - $HOME/.local/nginx/conf.d/:/etc/nginx/conf.d/:ro
+      - $HOME/.local/www/certbot/:/var/www/certbot/:ro
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - $HOME/.local/www/certbot/:./certbot/www/:rw
-      - $HOME/.local/letsencrypt/:./certbot/conf/:rw
+      - $HOME/.local/www/certbot/:/var/www/certbot/:rw
+      - $HOME/.local/letsencrypt/:/etc/letsencrypt/:rw
