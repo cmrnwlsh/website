@@ -6,5 +6,6 @@ WORKDIR /home/website/resource
 COPY . .
 
 RUN rustup target add wasm32-unknown-unknown && cargo install cargo-leptos
+EXPOSE 3000
 CMD ["cargo", "leptos", "serve"]
 
