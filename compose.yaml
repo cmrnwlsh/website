@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  proxy:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./nginx/conf/:$HOME/.local/nginx/conf.d/:ro
+      - ./certbot/www/:$HOME/.local/www/certbot/:ro
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:$HOME/.local/www/certbot/:rw
+      - ./certbot/conf/:$HOME/.local/letsencrypt/:rw
