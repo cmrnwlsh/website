@@ -4,8 +4,8 @@ services:
   proxy:
     image: nginx:latest
     ports:
-      - 127.0.0.1:80:80
-      - 127.0.0.1:443:443
+      - 80:80
+      - 443:443
     restart: unless-stopped
     volumes:
       - /home/server/.local/nginx/conf.d/:/etc/nginx/conf.d/:ro
@@ -14,4 +14,4 @@ services:
     image: certbot/certbot:latest
     volumes:
       - /home/server/.local/www/certbot/:/var/www/certbot/:rw
-      - /home/server/.local/letsencrypt/:/etc/letsencrypt/:rw
+      - /etc/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:rw 
