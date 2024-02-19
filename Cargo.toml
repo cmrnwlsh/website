@@ -22,6 +22,7 @@ phf = { version = "0.11.2", features = ["macros"] }
 either = "1.10.0"
 openssl = { version = "0.10.63", features = ["vendored"], optional = true }
 env_logger = { version = "0.11.2", optional = true }
+actix-web-lab = { version = "0.20.2", optional = true }
 
 [features]
 ssr = [
@@ -30,6 +31,7 @@ ssr = [
   "dep:leptos_actix",
   "dep:openssl",
   "dep:env_logger",
+  "dep:actix-web-lab",
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
