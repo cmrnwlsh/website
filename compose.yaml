@@ -18,5 +18,7 @@ services:
   website:
     build: .
     ports:
-      443:3000
+      - 443:3000
     network_mode: "host"
+    volumes:
+      - /etc/letsencrypt/live/cmrnw.com:/home/website/resource/cert
