@@ -8,5 +8,5 @@ COPY . .
 RUN rustup target add wasm32-unknown-unknown &&\
   cargo install cargo-leptos &&\
   cargo leptos build --release -vv
-CMD ["cargo", "leptos", "serve"]
+ENTRYPOINT ["./target/release/website"]
 
