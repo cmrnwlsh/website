@@ -21,4 +21,4 @@ services:
       - 443:3000
     network_mode: "host"
     volumes:
-      - /home/server/.local/letsencrypt/live/cmrnw.com:/etc/letsencrypt/
+      - /home/server/.local/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:ro
