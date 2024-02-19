@@ -14,11 +14,11 @@ services:
     image: certbot/certbot:latest
     volumes:
       - /home/server/.local/www/certbot/:/var/www/certbot/:rw
-      - /etc/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:rw
+      - /home/server/.local/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:rw
   website:
     build: .
     ports:
       - 443:3000
     network_mode: "host"
     volumes:
-      - /etc/letsencrypt/live/cmrnw.com:/home/website/resource/cert
+      - /home/server/.local/letsencrypt/live/cmrnw.com:/home/website/resource/cert
