@@ -46,7 +46,7 @@ hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 inherits = "release"
 opt-level = 'z'
 lto = true
-site-addr = "0.0.0.0:443"
+site-addr = "0.0.0.0:3000"
 codegen-units = 1
 panic = "abort"
 
