@@ -13,7 +13,7 @@ use actix_web_lab::{header::StrictTransportSecurity, middleware::map_response};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let conf = get_configuration(None).await.unwrap();
-    let addr = conf.leptos_options.site_addr;
+    let addr = "0.0.0.0:443";
     let routes = generate_route_list(App);
     let mut ssl_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         ssl_builder
