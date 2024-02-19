@@ -8,6 +8,8 @@ services:
     volumes:
       - /home/server/.local/nginx/conf.d/:/etc/nginx/conf.d/:ro
       - /home/server/.local/www/certbot/:/var/www/certbot/:ro
+      - /home/server/.local/letsencrypt/live/cmrnw.com:/etc/letsencrypt/:ro
+
   certbot:
     image: certbot/certbot:latest
     volumes:
