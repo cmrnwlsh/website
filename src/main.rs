@@ -13,9 +13,9 @@ async fn main() -> std::io::Result<()> {
     let routes = generate_route_list(App);
     let mut ssl_builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
         ssl_builder
-        .set_private_key_file("./cert/privkey.pem", SslFiletype::PEM)
+        .set_private_key_file("/home/website/resource/cert/privkey.pem", SslFiletype::PEM)
         .unwrap();
-    ssl_builder.set_certificate_chain_file("./cert/fullchain.pem").unwrap();
+    ssl_builder.set_certificate_chain_file("/home/website/resource/cert/fullchain.pem").unwrap();
     println!("listening on https://{}", &addr);
     
     HttpServer::new(move || {
