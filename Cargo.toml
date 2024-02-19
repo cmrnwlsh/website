@@ -21,19 +21,21 @@ uuid = { version = "1.7.0", features = ["v4", "fast-rng"] }
 phf = { version = "0.11.2", features = ["macros"] }
 either = "1.10.0"
 openssl = { version = "0.10.63", features = ["vendored"], optional = true }
+env_logger = { version = "0.11.2", optional = true }
 
 [features]
-csr = ["leptos/csr", "leptos_meta/csr", "leptos_router/csr"]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 ssr = [
   "dep:actix-files",
   "dep:actix-web",
   "dep:leptos_actix",
   "dep:openssl",
+  "dep:env_logger",
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
 ]
+csr = ["leptos/csr", "leptos_meta/csr", "leptos_router/csr"]
+hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
