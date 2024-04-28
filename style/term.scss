@@ -1,0 +1,11 @@
+@use 'colors';
+
+#term {
+  height: 500px;
+  width: 800px;
+  background-color: colors.$primary;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20%;
+  border-radius: 10px;
+}
