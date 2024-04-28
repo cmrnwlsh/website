@@ -4,11 +4,10 @@ use leptos::*;
 use leptos_actix::{generate_route_list, LeptosRoutes};
 use website::app::*;
 
-#[actix_web::main]
+#[main]
 async fn main() -> std::io::Result<()> {
     let conf = get_configuration(None).await.unwrap();
     let addr = conf.leptos_options.site_addr;
-    // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
     println!("listening on http://{}", &addr);
 
@@ -28,9 +27,9 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-#[actix_web::get("favicon.ico")]
+#[get("favicon.ico")]
 async fn favicon(
-    leptos_options: actix_web::web::Data<leptos::LeptosOptions>,
+    leptos_options: web::Data<leptos::LeptosOptions>,
 ) -> actix_web::Result<actix_files::NamedFile> {
     let leptos_options = leptos_options.into_inner();
     let site_root = &leptos_options.site_root;

@@ -1,7 +1,8 @@
 @use 'term';
+@use 'colors';
 
 body {
 	font-family: monospace;
-	background-color: #383837;
-	color: #c57776;
+	background-color: colors.$primary;
+	color: colors.$accent3;
 }
