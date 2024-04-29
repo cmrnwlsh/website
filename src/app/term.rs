@@ -1,14 +1,15 @@
-use leptos::*;
 use leptos::ev::SubmitEvent;
 use leptos::html::Input;
+use leptos::*;
 
 #[component]
 pub fn Term() -> impl IntoView {
-    let input_ref:NodeRef<Input> = create_node_ref();
+    let input_ref: NodeRef<Input> = create_node_ref();
     let (output, set_output) =
         create_signal(vec![String::from("Hello world")]);
     let (input, set_input) =
         create_signal(String::from(""));
+
     view! {
         <div id="term">
             <div>
