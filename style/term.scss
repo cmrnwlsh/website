@@ -1,15 +1,13 @@
-@use 'colors';
-
 #term {
   height: 60vh;
   width: 80vw;
-  background-color: colors.$secondary;
+  background-color: var(--secondary);
   margin-left: auto;
   margin-right: auto;
   margin-top: 10%;
   border-radius: 10px;
   padding: 10px;
-  box-shadow: 20px 10px 15px colors.$accent1;
+  box-shadow: 20px 10px 15px var(--accent1);
   display: flex;
   flex-direction: column-reverse;
   overflow-wrap: break-word;
@@ -20,7 +18,7 @@
 
   input {
     font-family: monospace;
-    color: colors.$accent3;
+    color: var(--accent3);
     background-color: transparent;
     border: none;
     outline: none;

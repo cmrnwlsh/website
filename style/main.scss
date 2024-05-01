@@ -1,8 +1,15 @@
 @use 'term';
-@use 'colors';
+
+:root {
+	--primary: #6A88AD;
+	--secondary: #20222B;
+	--accent1: #474B72;
+	--accent2: #6A9CA3;
+	--accent3: #9EBFA5;
+}
 
 body {
 	font-family: monospace;
-	background-color: colors.$primary;
-	color: colors.$accent3;
+	background-color: var(--primary);
+	color: var(--accent3);
 }
