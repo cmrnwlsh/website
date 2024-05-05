@@ -17,6 +17,7 @@ leptos_actix = { version = "0.6", optional = true }
 leptos_router = { version = "0.6", features = ["nightly"] }
 wasm-bindgen = "=0.2.92"
 leptos-use = "0.10.9"
+uuid = { version = "1.8.0", features = ["v4", "fast-rng"] }
 
 [features]
 csr = ["leptos/csr", "leptos_meta/csr", "leptos_router/csr"]
@@ -28,7 +29,7 @@ ssr = [
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
-  "leptos-use/ssr"
+  "leptos-use/ssr",
 ]
 
 [profile.wasm-release]
