@@ -16,7 +16,7 @@ pub fn Term() -> impl IntoView {
             "root/test_file".into(),
             FileSystemEntry::File {
                 name: "test_file".into(),
-                content: "test".into(),
+                content: "this\ntest\nis\na\nmultiline\ntest file".into(),
             },
         )]
         .into(),
@@ -33,6 +33,7 @@ pub fn Term() -> impl IntoView {
         output.update(|history| {
             let filesystem = filesystem.get_value();
             if let Some(command) = command {
+                history.push(format!("{}> {command} {}", current_dir.get(), args.join(" ")).into());
                 match command.as_str() {
                     "cat" => history.push('b: {
                         let Some(target) = args.first() else {

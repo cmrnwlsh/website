@@ -13,6 +13,7 @@
 
   .inner {
     overflow-wrap: break-word;
+    white-space: pre-wrap;
     display: flex;
     flex-direction: column-reverse;
     overflow-y: scroll;
