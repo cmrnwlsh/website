@@ -10,7 +10,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
     view! {
         <Stylesheet id="leptos" href="/pkg/cmrnw.css"/>
-        <Title text="Welcome to Leptos"/>
+        <Title text="cmrnw.com"/>
         <Router>
             <main>
                 <Routes>
