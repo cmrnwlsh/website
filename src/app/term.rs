@@ -60,7 +60,7 @@ pub fn Term() -> impl IntoView {
         <div id="term">
             <div>
                 <form on:submit=command_eval>
-                    <label for="input">{"root>"}</label>
+                    <label for="input">{move || format!("{}>", current_dir.get())}</label>
                     <input type="text" node_ref=input_ref prop:value=input />
                 </form>
             </div>
