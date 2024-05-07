@@ -10,6 +10,7 @@ pub fn Term() -> impl IntoView {
     let output = create_rw_signal(vec![Line::from("Hello world")]);
     let input = create_rw_signal(String::from(""));
     let current_dir = create_rw_signal(String::from("root"));
+    let cmp_results: RwSignal<Option<String>> = create_rw_signal(None);
 
     let filesystem: StoredValue<FileSystem> = store_value(
         vec![(
@@ -75,6 +76,7 @@ pub fn Term() -> impl IntoView {
 
     view! {
         <div id="term">
+            {cmp_results}
             <div>
                 <form on:submit=command_eval>
                     <label for="input">{move || format!("{}>", current_dir.get())}</label>
@@ -119,11 +121,7 @@ impl Line {
 struct FileSystem(HashMap<String, FileSystemEntry>);
 impl From<Vec<(String, FileSystemEntry)>> for FileSystem {
     fn from(value: Vec<(String, FileSystemEntry)>) -> Self {
-        let mut fs = HashMap::new();
-        value.into_iter().for_each(|(k, v)| {
-            fs.insert(k, v);
-        });
-        Self(fs)
+        Self(HashMap::from_iter(value))
     }
 }
 
