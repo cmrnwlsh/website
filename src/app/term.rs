@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos::{ev::SubmitEvent, html::Input};
 use shlex::Shlex;
-use std::collections::HashMap;
+use std::collections::{hash_map::Iter, HashMap};
 use uuid::Uuid;
 
 #[component]
@@ -24,32 +24,49 @@ pub fn Term() -> impl IntoView {
 
     let command_eval = move |ev: SubmitEvent| {
         ev.prevent_default();
+
         let elem = input_ref.get().unwrap();
         let value = elem.value();
         let mut tokens = Shlex::new(value.as_str());
-
         let (command, args) = (tokens.next(), tokens.collect::<Vec<_>>());
 
         output.update(|history| {
             let filesystem = filesystem.get_value();
+
+            let ls = || {
+                filesystem
+                    .iter()
+                    .filter_map(|(path, entry)| {
+                        if path.as_str() == format!("{}/{}", current_dir.get(), entry.name()) {
+                            Some(entry.name())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .into()
+            };
+
+            let cat = || {
+                if let Some(target) = args.first() {
+                    match filesystem.get(&format!("{}/{target}", current_dir.get())) {
+                        Some(FileSystemEntry::File { content, .. }) => content.into(),
+                        _ => format!("file not found: {target}").into(),
+                    }
+                } else {
+                    "no argument".into()
+                }
+            };
+
             if let Some(command) = command {
                 history.push(format!("{}> {command} {}", current_dir.get(), args.join(" ")).into());
-                match command.as_str() {
-                    "cat" => history.push('b: {
-                        let Some(target) = args.first() else {
-                            break 'b "no argument".into();
-                        };
-                        if let Some(FileSystemEntry::File { content, .. }) =
-                            filesystem.get(&format!("{}/{target}", current_dir.get()))
-                        {
-                            content.into()
-                        } else {
-                            format!("file not found: {target}").into()
-                        }
-                    }),
-                    "echo" => history.push(args.join(" ").into()),
-                    command => history.push(format!("command not found: {command}").into()),
-                };
+                history.push(match command.as_str() {
+                    "ls" => ls(),
+                    "cat" => cat(),
+                    "echo" => args.join(" ").into(),
+                    command => format!("command not found: {command}").into(),
+                });
             }
         });
 
@@ -111,18 +128,31 @@ impl From<Vec<(String, FileSystemEntry)>> for FileSystem {
 }
 
 impl FileSystem {
-    pub fn get(&self, k: &String) -> Option<&FileSystemEntry> {
+    pub fn get(&self, k: &str) -> Option<&FileSystemEntry> {
         self.0.get(k)
     }
 
-    pub fn get_mut(&mut self, k: &String) -> Option<&mut FileSystemEntry> {
+    pub fn get_mut(&mut self, k: &str) -> Option<&mut FileSystemEntry> {
         self.0.get_mut(k)
+    }
+
+    pub fn iter(&self) -> Iter<String, FileSystemEntry> {
+        self.0.iter()
     }
 }
 
 #[derive(Clone, Debug)]
 enum FileSystemEntry {
     File { name: String, content: String },
-    Directory(Vec<String>),
-    Link(String),
+    Directory { name: String, content: Vec<String> },
+    Link { name: String, content: String },
+}
+
+impl FileSystemEntry {
+    fn name(&self) -> &str {
+        match self {
+            Self::File { name, .. } | Self::Link { name, .. } => name,
+            Self::Directory { name, .. } => name,
+        }
+    }
 }
