@@ -1,5 +1,8 @@
 use leptos::*;
-use leptos::{ev::SubmitEvent, html::Input};
+use leptos::{
+    ev::{KeyboardEvent, SubmitEvent},
+    html::Input,
+};
 use shlex::Shlex;
 use std::collections::{hash_map::Iter, HashMap};
 use uuid::Uuid;
@@ -12,6 +15,13 @@ pub fn Term() -> impl IntoView {
     let current_dir = create_rw_signal(String::from("root"));
     let cmp_results: RwSignal<Option<String>> = create_rw_signal(None);
 
+    let shlex = move || {
+        let elem = input_ref.get().unwrap();
+        let value = elem.value();
+        let mut tokens = Shlex::new(value.as_str());
+        (tokens.next(), tokens.collect::<Vec<String>>())
+    };
+
     let filesystem: StoredValue<FileSystem> = store_value(
         vec![(
             "root/test_file".into(),
@@ -23,64 +33,79 @@ pub fn Term() -> impl IntoView {
         .into(),
     );
 
-    let command_eval = move |ev: SubmitEvent| {
-        ev.prevent_default();
+    let ls = Box::new(move || {
+        let filesystem = filesystem.get_value();
+        filesystem
+            .iter()
+            .filter_map(|(path, entry)| {
+                if path.as_str() == format!("{}/{}", current_dir.get(), entry.name()) {
+                    Some(entry.name())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
+            .into()
+    });
 
+    let cat = Box::new(move || {
+        let (_, args) = shlex();
+        let filesystem = filesystem.get_value();
+        if let Some(target) = args.first() {
+            match filesystem.get(&format!("{}/{target}", current_dir.get())) {
+                Some(FileSystemEntry::File { content, .. }) => content.into(),
+                _ => format!("file not found: {target}").into(),
+            }
+        } else {
+            "no argument".into()
+        }
+    });
+
+    let echo = Box::new(move || {
+        let (_, args) = shlex();
+        Line::from(args.join(" "))
+    });
+
+    type Cmd = Box<dyn Fn() -> Line>;
+    let cmds: HashMap<&str, Cmd> = HashMap::from([
+        ("ls", ls as Cmd),
+        ("cat", cat as Cmd),
+        ("echo", echo as Cmd),
+    ]);
+
+    let command_eval = move |ev: SubmitEvent| {
         let elem = input_ref.get().unwrap();
         let value = elem.value();
         let mut tokens = Shlex::new(value.as_str());
+
         let (command, args) = (tokens.next(), tokens.collect::<Vec<_>>());
+        ev.prevent_default();
 
         output.update(|history| {
-            let filesystem = filesystem.get_value();
-
-            let ls = || {
-                filesystem
-                    .iter()
-                    .filter_map(|(path, entry)| {
-                        if path.as_str() == format!("{}/{}", current_dir.get(), entry.name()) {
-                            Some(entry.name())
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<_>>()
-                    .join(" ")
-                    .into()
-            };
-
-            let cat = || {
-                if let Some(target) = args.first() {
-                    match filesystem.get(&format!("{}/{target}", current_dir.get())) {
-                        Some(FileSystemEntry::File { content, .. }) => content.into(),
-                        _ => format!("file not found: {target}").into(),
-                    }
-                } else {
-                    "no argument".into()
-                }
-            };
-
             if let Some(command) = command {
                 history.push(format!("{}> {command} {}", current_dir.get(), args.join(" ")).into());
-                history.push(match command.as_str() {
-                    "ls" => ls(),
-                    "cat" => cat(),
-                    "echo" => args.join(" ").into(),
-                    command => format!("command not found: {command}").into(),
-                });
+                history.push(cmds[command.as_str()]());
             }
         });
 
         input.set("".into())
     };
 
+    let key_action = move |ev: KeyboardEvent| {
+        if ev.key_code() == 9 {
+            ev.prevent_default();
+            ev.stop_propagation();
+        }
+    };
+
     view! {
         <div id="term">
             {cmp_results}
             <div>
-                <form on:submit=command_eval>
+                <form on:submit=command_eval on:keydown=key_action>
                     <label for="input">{move || format!("{}>", current_dir.get())}</label>
-                    <input type="text" node_ref=input_ref prop:value=input />
+                    <input type="text" node_ref=input_ref />
                 </form>
             </div>
             <div class="inner">
