@@ -33,7 +33,9 @@ pub fn Term() -> impl IntoView {
         .into(),
     );
 
-    let ls = Box::new(move || {
+    type Cmd = Box<dyn Fn(Vec<&str>) -> Line>;
+
+    let ls: Cmd = Box::new(move |_| {
         let filesystem = filesystem.get_value();
         filesystem
             .iter()
@@ -49,8 +51,7 @@ pub fn Term() -> impl IntoView {
             .into()
     });
 
-    let cat = Box::new(move || {
-        let (_, args) = shlex();
+    let cat: Cmd = Box::new(move |args| {
         let filesystem = filesystem.get_value();
         if let Some(target) = args.first() {
             match filesystem.get(&format!("{}/{target}", current_dir.get())) {
@@ -62,30 +63,21 @@ pub fn Term() -> impl IntoView {
         }
     });
 
-    let echo = Box::new(move || {
-        let (_, args) = shlex();
-        Line::from(args.join(" "))
-    });
+    let echo: Cmd = Box::new(move |args| Line::from(args.join(" ")));
 
-    type Cmd = Box<dyn Fn() -> Line>;
-    let cmds: HashMap<&str, Cmd> = HashMap::from([
-        ("ls", ls as Cmd),
-        ("cat", cat as Cmd),
-        ("echo", echo as Cmd),
-    ]);
+    let cmds: HashMap<&str, Cmd> = HashMap::from([("ls", ls), ("cat", cat), ("echo", echo)]);
 
     let command_eval = move |ev: SubmitEvent| {
-        let elem = input_ref.get().unwrap();
-        let value = elem.value();
-        let mut tokens = Shlex::new(value.as_str());
-
-        let (command, args) = (tokens.next(), tokens.collect::<Vec<_>>());
         ev.prevent_default();
+        let (command, args) = shlex();
 
         output.update(|history| {
             if let Some(command) = command {
                 history.push(format!("{}> {command} {}", current_dir.get(), args.join(" ")).into());
-                history.push(cmds[command.as_str()]());
+                history.push(cmds.get(command.as_str()).map_or_else(
+                    || format!("command not found: {command}").into(),
+                    |f| f(args.iter().map(String::as_str).collect()),
+                ));
             }
         });
 
@@ -105,7 +97,7 @@ pub fn Term() -> impl IntoView {
             <div>
                 <form on:submit=command_eval on:keydown=key_action>
                     <label for="input">{move || format!("{}>", current_dir.get())}</label>
-                    <input type="text" node_ref=input_ref />
+                    <input type="text" node_ref=input_ref prop:value=input />
                 </form>
             </div>
             <div class="inner">
