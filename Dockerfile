@@ -5,6 +5,7 @@ USER website
 WORKDIR /home/website
 
 COPY . .
-RUN cargo install --path .
+RUN cargo install --locked cargo-leptos &&\
+  cargo leptos build --release
 
-CMD ["website"]
+CMD ["./target/release/website"]
