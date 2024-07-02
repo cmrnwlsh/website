@@ -9,7 +9,7 @@ async fn main() -> std::io::Result<()> {
     use leptos_actix::{generate_route_list, LeptosRoutes};
 
     let conf = get_configuration(None).await.unwrap();
-    let addr = "0.0.0.0:443";
+    let addr = "0.0.0.0:3000";
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
     println!("listening on http://{}", &addr);
