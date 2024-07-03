@@ -1,11 +1,13 @@
-FROM rust:1.79
+FROM rust:1.79 as builder
 
-RUN useradd -ms /bin/bash website
-USER website
-WORKDIR /home/website
-
+WORKDIR /usr/src/website
 COPY . .
 RUN cargo install --locked cargo-leptos &&\
   cargo leptos build --release
 
-CMD ["./target/release/website"]
+FROM debian:bookworm-slim
+RUN rm -rf /var/lib/apt/lists/*
+USER website
+WORKDIR /home/website
+COPY --from=builder /usr/src/website/target .
+CMD ["./release/website"]
